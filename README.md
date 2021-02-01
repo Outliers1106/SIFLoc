@@ -63,6 +63,15 @@ After installing MindSpore via the official website, you can start training and 
   # standalone evaluation
   bash scripts/run_eval.sh
   ```
+- run on GPU
+  ```bash
+  # standalone pre-training
+  bash scripts/run_pretrain_gpu.sh
+  # standalone training
+  bash scripts/run_train_gpu.sh
+  # standalone evaluation
+  bash scripts/run_eval_gpu.sh
+  ```
 Inside scripts, there are some parameter settings that can be adjusted for pre-training/training/evaluation. 
 
 # [Script description](#contents)
