@@ -23,7 +23,7 @@ The overall network architecture of SIFLoc is shown in original paper.
 
 # [Dataset](#contents)
 
-Original dataset is from Human Protein Atlas (www.proteinatlas.org). After post-processing, we obtain a custom dataset including 4 parts ( [link1](https://bioimagestore.blob.core.windows.net/dataset/hpa dataSet_part1.zip), [link2](https://bioimagestore.blob.core.windows.net/dataset/hpa_dataSet_part2.zip),[ link3](https://bioimagestore.blob.core.windows.net/dataset/hpa_dataSet_part3.zip), [link4](https://bioimagestore.blob.core.windows.net/dataset/hpa_dataSet_part4.zip)) which is about 6.5GB.
+Original dataset is from Human Protein Atlas (www.proteinatlas.org). After post-processing, we obtain a custom dataset including 4 parts ( [link1](https://bioimagestore.blob.core.windows.net/dataset/hpa%20dataSet_part1.zip), [link2](https://bioimagestore.blob.core.windows.net/dataset/hpa_dataSet_part2.zip),[ link3](https://bioimagestore.blob.core.windows.net/dataset/hpa_dataSet_part3.zip), [link4](https://bioimagestore.blob.core.windows.net/dataset/hpa_dataSet_part4.zip)) which is about 6.5GB.
 - Dataset size: 173,594 color images (512$\times$512), 13,261 bags in 27 classes
 - Data format: RGB images.
   - Note: Data will be processed in src/datasets.py
