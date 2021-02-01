@@ -63,7 +63,7 @@ After installing MindSpore via the official website, you can start training and 
   # standalone evaluation
   bash scripts/run_eval.sh
   ```
-Inside scripts, there are some parameter settings that can be adjusted during pre-training/training/evaluation. 
+Inside scripts, there are some parameter settings that can be adjusted for pre-training/training/evaluation. 
 
 # [Script description](#contents)
 
