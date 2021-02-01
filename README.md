@@ -71,28 +71,28 @@ Inside scripts, there are some parameter settings that can be adjusted during pr
 
 ```markdown
   . SIFLoc
-  ├── Readme.md  									# descriptions about SIFLoc
+  ├── Readme.md 			# descriptions about SIFLoc
   ├── scripts
-  │   ├──run_pretrain.sh     						 # script to pre-train
-  │   ├──run_train.sh     						 	# script to train
-  │   ├──run_eval.sh     						 		# script to eval
+  │   ├──run_pretrain.sh  	# script to pre-train
+  │   ├──run_train.sh       # script to train
+  │   ├──run_eval.sh     	# script to eval
   ├── src
-  │   ├──RandAugment     						 # data augmentation polices
-  │   ├──callbacks.py    							 # loss callback 
-  │   ├──config.py       							   # parameter configuration
-  │   ├──datasets.py    	 						 # creating dataset
-  │   ├──eval_metrics.py 					  	# evaluation metrics
-  │   ├──loss.py         								# contrastive loss and BCE loss
-  │   ├──lr_generator.py 						   # learning rate config
-  │   ├──config.py      						  	# parameter configuration
-  │   ├──network_define_eval.py     		 # evaluation cell
-  │   ├──network_define_pretrain.py 	   # pre-train cell
-  │   ├──network_define_train.py    		 # train cell
-  │   └── resnet.py    								# backbone network
-  ├── enhanced.csv       							# labels of hpa dataset
-  ├── eval.py       									# evaluation script
-  ├── pretrain.py       					  		# pre-training script
-  └── train.py       									# training script
+  │   ├──RandAugment     	# data augmentation polices
+  │   ├──callbacks.py    	# loss callback 
+  │   ├──config.py       	# parameter configuration
+  │   ├──datasets.py    	# creating dataset
+  │   ├──eval_metrics.py 	# evaluation metrics
+  │   ├──loss.py         	# contrastive loss and BCE loss
+  │   ├──lr_generator.py 	# learning rate config
+  │   ├──config.py      	# parameter configuration
+  │   ├──network_define_eval.py     	# evaluation cell
+  │   ├──network_define_pretrain.py 	# pre-train cell
+  │   ├──network_define_train.py        # train cell
+  │   └── resnet.py 					# backbone network
+  ├── enhanced.csv       				# labels of hpa dataset
+  ├── eval.py       					# evaluation script
+  ├── pretrain.py       		  		# pre-training script
+  └── train.py       					# training script
 ```
 
 ## [Script parameters](#contents)
@@ -103,67 +103,67 @@ Parameters for both pre-training and training can be set in src/config.py
   ```python
   # base setting
   "description": "description.",        # description for pre-training   
-  "prefix": prefix,											# prefix for pre-training
-  "time_prefix": time_prefix,      			# time prefix
-  "network": "resnet18",								# network architecture
-  "low_dims": 128,											# the dim of last layer's feature
-  "use_MLP": True,											# whether use MLP
+  "prefix": prefix,						# prefix for pre-training
+  "time_prefix": time_prefix,      		# time prefix
+  "network": "resnet18",				# network architecture
+  "low_dims": 128,						# the dim of last layer's feature
+  "use_MLP": True,						# whether use MLP
   # save
-  "save_checkpoint": True, 							# whether save ckpt
-  "save_checkpoint_epochs": 1,					# save per <num> epochs
-  "keep_checkpoint_max": 2,							# save at most <num> ckpt
+  "save_checkpoint": True, 				# whether save ckpt
+  "save_checkpoint_epochs": 1,			# save per <num> epochs
+  "keep_checkpoint_max": 2,				# save at most <num> ckpt
   # dataset
-  "dataset": "hpa",											# dataset name
-  "bag_size": 1,												# bag size = 1 for pre-training
-  "classes": 27,												# class number
-  "num_parallel_workers": 8,						# num_parallel_workers
+  "dataset": "hpa",						# dataset name
+  "bag_size": 1,						# bag size = 1 for pre-training
+  "classes": 27,						# class number
+  "num_parallel_workers": 8,			# num_parallel_workers
   # optimizer
-  "base_lr": 0.003,											# init learning rate
-  "type": "SGD",												# optimizer type
-  "momentum": 0.9,											# momentum
-  "weight_decay": 5e-4,									# weight decay
-  "loss_scale": 1,											# loss scale
-  "sigma": 0.1,													# $\tau$
+  "base_lr": 0.003,						# init learning rate
+  "type": "SGD",						# optimizer type
+  "momentum": 0.9,						# momentum
+  "weight_decay": 5e-4,					# weight decay
+  "loss_scale": 1,						# loss scale
+  "sigma": 0.1,							# $\tau$
   # trainer
-  "batch_size": 32,											# batch size
-  "epochs": 100,												# epochs for pre-training
-  "lr_schedule": "cosine_lr",						# learning rate schedule
-  "lr_mode": "epoch",										# "epoch" or "step"
-  "warmup_epoch": 0,										# epochs for warming up
+  "batch_size": 32,						# batch size
+  "epochs": 100,						# epochs for pre-training
+  "lr_schedule": "cosine_lr",			# learning rate schedule
+  "lr_mode": "epoch",					# "epoch" or "step"
+  "warmup_epoch": 0,					# epochs for warming up
   ```
 - config for training
 
   ```python
   # base setting
   "description": "description.",        # description for pre-training  
-  "prefix": prefix,											# prefix for training
-  "time_prefix": time_prefix,      			# time prefix
-  "network": "resnet18",								# network architecture
-  "low_dims": 128,											# ignoring this for training
-  "use_MLP": False,											# whether use MLP (False)
+  "prefix": prefix,						# prefix for training
+  "time_prefix": time_prefix,      		# time prefix
+  "network": "resnet18",				# network architecture
+  "low_dims": 128,						# ignoring this for training
+  "use_MLP": False,						# whether use MLP (False)
   # save
-  "save_checkpoint": True,							# whether save ckpt
-  "save_checkpoint_epochs": 1,					# save per <num> epochs
-  "keep_checkpoint_max": 2,							# save at most <num> ckpt
+  "save_checkpoint": True,				# whether save ckpt
+  "save_checkpoint_epochs": 1,			# save per <num> epochs
+  "keep_checkpoint_max": 2,				# save at most <num> ckpt
   # dataset
-  "dataset": "hpa",											# dataset name
-  "bag_size_for_train": 1,							# bag size = 1 for training 
-  "bag_size_for_eval": 20,							# bag size = 20 for evaluation
-  "classes": 27,												# class number
-  "num_parallel_workers": 8,						# num_parallel_workers
+  "dataset": "hpa",						# dataset name
+  "bag_size_for_train": 1,				# bag size = 1 for training 
+  "bag_size_for_eval": 20,				# bag size = 20 for evaluation
+  "classes": 27,						# class number
+  "num_parallel_workers": 8,			# num_parallel_workers
   # optimizer
-  "base_lr": 0.0001,										# init learning rate
-  "type": "Adam",												# optimizer type
-  "beta1": 0.5,													# beta1
-  "beta2": 0.999,												# beta2
-  "weight_decay": 0,										# weight decay
-  "loss_scale": 1,											# loss scale
+  "base_lr": 0.0001,					# init learning rate
+  "type": "Adam",						# optimizer type
+  "beta1": 0.5,							# beta1
+  "beta2": 0.999,						# beta2
+  "weight_decay": 0,					# weight decay
+  "loss_scale": 1,						# loss scale
   # trainer
-  "batch_size_for_train": 8,						# batch size for training
-  "batch_size_for_eval": 1,							# batch size for evaluation
-  "epochs": 20,													# training epochs
-  "eval_per_epoch": 1,									# eval per <num> epochs
-  "lr_schedule": "cosine_lr",						# learning rate schedule
-  "lr_mode": "epoch",										# "epoch" or "step"
+  "batch_size_for_train": 8,			# batch size for training
+  "batch_size_for_eval": 1,				# batch size for evaluation
+  "epochs": 20,							# training epochs
+  "eval_per_epoch": 1,					# eval per <num> epochs
+  "lr_schedule": "cosine_lr",			# learning rate schedule
+  "lr_mode": "epoch",					# "epoch" or "step"
   "warmup_epoch": 0,										# epochs for warming up
   ```
