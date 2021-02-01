@@ -33,23 +33,20 @@ def _weight_variable_(shape, factor=0.01):
 
 def _conv3x3(in_channel, out_channel, stride=1):
     weight_shape = (out_channel, in_channel, 3, 3)
-    weight = _weight_variable(weight_shape)
     return nn.Conv2d(in_channel, out_channel,
-                     kernel_size=3, stride=stride, padding=0, pad_mode='same', weight_init=weight)
+                     kernel_size=3, stride=stride, padding=0, pad_mode='same', weight_init="HeUniform")
 
 
 def _conv1x1(in_channel, out_channel, stride=1):
     weight_shape = (out_channel, in_channel, 1, 1)
-    weight = _weight_variable(weight_shape)
     return nn.Conv2d(in_channel, out_channel,
-                     kernel_size=1, stride=stride, padding=0, pad_mode='same', weight_init=weight)
+                     kernel_size=1, stride=stride, padding=0, pad_mode='same', weight_init="HeUniform")
 
 
 def _conv7x7(in_channel, out_channel, stride=1):
     weight_shape = (out_channel, in_channel, 7, 7)
-    weight = _weight_variable(weight_shape)
     return nn.Conv2d(in_channel, out_channel,
-                     kernel_size=7, stride=stride, padding=0, pad_mode='same', weight_init=weight)
+                     kernel_size=7, stride=stride, padding=0, pad_mode='same', weight_init="HeUniform")
 
 
 def _bn(channel, training=True):
@@ -72,8 +69,7 @@ def _bn_last(channel, training=True):
 
 def _fc(in_channel, out_channel):
     weight_shape = (out_channel, in_channel)
-    weight = _weight_variable_(weight_shape)
-    return nn.Dense(in_channel, out_channel, has_bias=True, weight_init=weight, bias_init=0)
+    return nn.Dense(in_channel, out_channel, has_bias=True, weight_init="HeUniform", bias_init=0)
 
 
 class BasicBlock(nn.Cell):

@@ -6,9 +6,7 @@ echo "==========================================================================
 PROJECT_DIR=$(cd "$(dirname "$0")" || exit; pwd)
 
 python ${PROJECT_DIR}/../eval.py \
-    --device_id 0 \
-    --device_num 1 \
-    --device_target Ascend \
+    --device_target GPU \
     --model_arch resnet18 \
     --classes 27 \
     --ckpt_path /path_to_load_ckpt_for_eval/ \

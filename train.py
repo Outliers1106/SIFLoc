@@ -28,8 +28,8 @@ random.seed(123)
 np.random.seed(123)
 de.config.set_seed(123)
 
-parser = argparse.ArgumentParser(description="AVA training")
-parser.add_argument("--device_id", type=int, default=7, help="Device id, default is 0.")
+parser = argparse.ArgumentParser(description="training")
+parser.add_argument("--device_id", type=int, default=0, help="Device id, default is 0.")
 parser.add_argument("--device_num", type=int, default=1, help="Use device nums, default is 1.")
 parser.add_argument('--device_target', type=str, default="Ascend", help='Device target')
 parser.add_argument('--run_distribute', type=bool, default=False, help='Run distribute')
@@ -64,7 +64,8 @@ if __name__ == '__main__':
 
     # context.set_context(mode=context.PYNATIVE_MODE, device_target="Ascend")
     context.set_context(mode=context.GRAPH_MODE, device_target=args_opt.device_target)
-    context.set_context(device_id=device_id)
+    if args_opt.device_target == "Ascend":
+        context.set_context(device_id=device_id)
 
     print("device num:{}".format(device_num))
     print("device id:{}".format(device_id))
@@ -177,7 +178,6 @@ if __name__ == '__main__':
     save_config([os.path.join(save_checkpoint_path, config_name)], config, vars(args_opt))
 
     print("training begins...")
-
     model.train(config.epochs, train_dataset, callbacks=cb, dataset_sink_mode=False)
     logger.info("Eval on test dataset ...")
     res = model.eval(test_dataset)

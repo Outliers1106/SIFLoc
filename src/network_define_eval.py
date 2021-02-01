@@ -108,23 +108,5 @@ class EvalMetric(nn.Metric):
         self.np_label = np.concatenate(self.np_label)
         self.np_pd = np.concatenate(self.np_pd)
         self.np_score = np.concatenate(self.np_score)
-
-        # for i in range(self.label_num):
-        #     if len(self.np_label_each_label[i]) > 0:
-        #         self.np_label_each_label[i] = np.concatenate(self.np_label_each_label[i])
-        #         self.np_score_each_label[i] = np.concatenate(self.np_score_each_label[i])
-        #         self.np_pd_each_label[i] = np.concatenate(self.np_pd_each_label[i])
-        #
-        #         lab_f1_macro_each_label, lab_f1_micro_each_label, label_auc_each_label = eval_metrics.np_metrics(
-        #             self.np_label_each_label[i], self.np_pd_each_label[i], score=self.np_score_each_label[i],
-        #             auc_use_micro=True)
-        #         label_instance_num = len(self.np_label_each_label[i])
-        #         print("label:{}, label_num:{}, f1 macro:{},f1 micro:{}, auc:{}".format(i, label_instance_num,
-        #                                                                                lab_f1_macro_each_label,
-        #                                                                                lab_f1_micro_each_label,
-        #                                                                                label_auc_each_label))
-        #     else:
-        #         print("label:{} does not exist!".format(i))
-
         lab_f1_macro, lab_f1_micro, lab_auc = eval_metrics.np_metrics(self.np_label, self.np_pd, score=self.np_score, path=self.path)
         return loss, lab_f1_macro, lab_f1_micro, lab_auc

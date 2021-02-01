@@ -1,13 +1,8 @@
-import time
-import numpy as np
 import mindspore.nn as nn
-import mindspore
-from mindspore.common.tensor import Tensor
 from mindspore.ops import functional as F
 from mindspore.ops import composite as C
 from mindspore.ops import operations as P
 from mindspore import ParameterTuple
-from mindspore.train.callback import Callback
 from mindspore.nn.wrap.grad_reducer import DistributedGradReducer
 
 

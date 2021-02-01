@@ -20,7 +20,7 @@ def sklearn_f1_micro(gt, predict):
     return metrics.f1_score(gt, predict, average='micro')
 
 
-def np_metrics(gt, predict, score=None, auc_use_micro=False, path=None):
+def np_metrics(gt, predict, score=None, path=None):
     try:
         sk_auc_macro = sklearn_auc_macro(gt, score)
     except ValueError:
@@ -42,7 +42,6 @@ def np_metrics(gt, predict, score=None, auc_use_micro=False, path=None):
     lab_acc_macro, lab_acc_macro_list = label_accuracy_macro(gt, predict, average=False)
     lab_precision_macro, lab_precision_macro_list = label_precision_macro(gt, predict, average=False)
     lab_recall_macro, lab_recall_macro_list = label_recall_macro(gt, predict, average=False)
-    #lab_f1_macro = compute_f1(lab_precision_macro, lab_recall_macro)
     lab_f1_macro, f1_list, f1_list_mean = label_f1_macro(gt, predict, average=False)
 
     lab_acc_micro = label_accuracy_micro(gt, predict)
@@ -52,6 +51,7 @@ def np_metrics(gt, predict, score=None, auc_use_micro=False, path=None):
     if not os.path.exists(path):
         os.makedirs(path)
     with open(os.path.join(path,"eval.txt"), 'a+') as f:
+        f.write("--------------------------------------------\n")
         f.write("example_subset_accuracy:   %.4f\n" % ex_subset_acc)
         f.write("example_accuracy:          %.4f\n" % ex_acc)
         f.write("example_precision:         %.4f\n" % ex_precision)
@@ -84,7 +84,7 @@ def np_metrics(gt, predict, score=None, auc_use_micro=False, path=None):
             f.write("(label:%d,lab_precision:  %.4f)\n" % (i, lab_precision_macro_list[i]))
         f.write("label_recall_macro: \n")
         for i in range(len(lab_recall_macro_list)):
-            f.write("(label:%d,lab_precision:  %.4f)\n" % (i, lab_recall_macro_list[i]))
+            f.write("(label:%d,lab_recall:     %.4f)\n" % (i, lab_recall_macro_list[i]))
         f.write("label_f1_macro: \n")
         for i in range(len(f1_list)):
             f.write("(label:%d,lab_f1:         %.4f)\n" % (i, f1_list[i]))
