@@ -92,12 +92,11 @@ Inside scripts, there are some parameter settings that can be adjusted for pre-t
   │   ├──datasets.py                 # creating dataset
   │   ├──eval_metrics.py             # evaluation metrics
   │   ├──loss.py                     # contrastive loss and BCE loss
-  │   ├──lr_generator.py             # learning rate config
-  │   ├──config.py                   # parameter configuration
+  │   ├──lr_schedule.py              # learning rate config
   │   ├──network_define_eval.py      # evaluation cell
   │   ├──network_define_pretrain.py  # pre-train cell
   │   ├──network_define_train.py     # train cell
-  │   └── resnet.py                  # backbone network
+  │   └──resnet.py                  # backbone network
   ├── enhanced.csv                   # labels of hpa dataset
   ├── eval.py                        # evaluation script
   ├── pretrain.py                    # pre-training script
