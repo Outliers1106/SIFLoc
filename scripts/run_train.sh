@@ -13,4 +13,4 @@ python ${PROJECT_DIR}/../train.py \
     --save_checkpoint_path /path_to_save_ckpt/ \
     --log_path /path_to_log/ \
     --load_ckpt_path /path_to_load_pretrain_ckpt/ \
-    --save_eval_path ./613_27_no_pretrain_test_select_test/
+    --save_eval_path /path_to_save_eval_txt/
