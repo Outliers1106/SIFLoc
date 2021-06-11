@@ -1,3 +1,4 @@
+"""SIFLoc train on hpa dataset"""
 import os
 import argparse
 import random
@@ -10,8 +11,8 @@ from mindspore.train.callback import CheckpointConfig
 from mindspore.train.callback import ModelCheckpoint
 from mindspore.train import Model
 from mindspore.context import ParallelMode
-from mindspore.train.serialization import load_checkpoint, load_param_into_net
-from mindspore.nn import SGD, Adam
+from mindspore.train.serialization import load_checkpoint
+from mindspore.nn import SGD, Adam, BCELoss
 import mindspore.dataset.engine as de
 
 from src.config import get_train_config, save_config, get_logger
@@ -22,7 +23,6 @@ from src.network_define_train import WithLossCell, TrainOneStepCell
 from src.network_define_eval import EvalCell, EvalMetric, EvalCallBack
 from src.callbacks import LossCallBack
 from src.lr_schedule import step_cosine_lr, cosine_lr
-from src.loss import BCELoss
 
 random.seed(123)
 np.random.seed(123)
@@ -102,7 +102,7 @@ if __name__ == '__main__':
     print("test dataset.get_dataset_size:{}".format(test_dataset.get_dataset_size()))
 
     print("the chosen network is {}".format(config.network))
-    logger.info("the chosen network is {}".format(config.network))
+    logger.info("the chosen network is %s", config.network)
 
     if config.network == 'resnet18':
         resnet = resnet18(low_dims=config.low_dims, pretrain=False, classes=config.classes)
@@ -111,12 +111,16 @@ if __name__ == '__main__':
     elif config.network == 'resnet101':
         resnet = resnet101(low_dims=config.low_dims, pretrain=False, classes=config.classes)
     else:
-        raise ("Unsupported net work!")
+        raise "Unsupported net work!"
     if args_opt.load_ckpt_path != "":
         print("load checkpoint from {}".format(args_opt.load_ckpt_path))
         load_checkpoint(args_opt.load_ckpt_path, net=resnet)
     else:
         print("dont load checkpoint")
+
+    if config.breakpoint_training_path != "":
+        print("breakpoint training from :{}".format(config.breakpoint_training_path))
+        load_checkpoint(config.breakpoint_training_path)
 
     loss = BCELoss(reduction='mean')
 
@@ -160,7 +164,7 @@ if __name__ == '__main__':
     if config.save_checkpoint:
         ckptconfig = CheckpointConfig(save_checkpoint_steps=config.save_checkpoint_epochs * train_dataset_batch_num,
                                       keep_checkpoint_max=config.keep_checkpoint_max)
-        ckpoint_cb = ModelCheckpoint(prefix='AVA', directory=save_checkpoint_path, config=ckptconfig)
+        ckpoint_cb = ModelCheckpoint(prefix='SIFLoc', directory=save_checkpoint_path, config=ckptconfig)
         cb += [ckpoint_cb]
 
     model = Model(net, metrics={'results_return': EvalMetric(path=args_opt.save_eval_path)},
@@ -182,4 +186,4 @@ if __name__ == '__main__':
     logger.info("Eval on test dataset ...")
     res = model.eval(test_dataset)
     print("Eval result:{}".format(res))
-    logger.info("Eval result:{}".format(res))
+    logger.info("Eval result:%s", res)

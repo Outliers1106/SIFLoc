@@ -1,3 +1,4 @@
+"""define pretrain network"""
 import mindspore.nn as nn
 from mindspore.ops import functional as F
 from mindspore.ops import composite as C

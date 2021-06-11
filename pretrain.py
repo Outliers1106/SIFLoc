@@ -1,17 +1,20 @@
+"""SIFLoc pretrain on hpa dataset"""
 import os
 import argparse
 import random
 import numpy as np
 
 import mindspore.common.dtype as mstype
+import mindspore.dataset.engine as de
+
 from mindspore import context, Tensor
 from mindspore.communication.management import init
+from mindspore.train import Model
 from mindspore.train.callback import CheckpointConfig
 from mindspore.train.callback import ModelCheckpoint
-from mindspore.train import Model
+from mindspore.train.serialization import load_checkpoint
 from mindspore.context import ParallelMode
 from mindspore.nn import SGD
-import mindspore.dataset.engine as de
 
 from src.config import get_pretrain_config, save_config, get_logger
 from src.datasets import makeup_pretrain_dataset
@@ -85,7 +88,7 @@ if __name__ == '__main__':
     print("dataset.get_dataset_size:{}".format(dataset.get_dataset_size()))
 
     print("the chosen network is {}".format(config.network))
-    logger.info("the chosen network is {}".format(config.network))
+    logger.info("the chosen network is %s", config.network)
 
     if config.network == 'resnet18':
         resnet = resnet18(low_dims=config.low_dims, pretrain=True, classes=config.classes)
@@ -94,7 +97,11 @@ if __name__ == '__main__':
     elif config.network == 'resnet101':
         resnet = resnet101(low_dims=config.low_dims, pretrain=True, classes=config.classes)
     else:
-        raise ("Unsupported net work!")
+        raise "Unsupported net work!"
+
+    if config.breakpoint_training_path != "":
+        print("breakpoint training from :{}".format(config.breakpoint_training_path))
+        load_checkpoint(config.breakpoint_training_path)
 
     loss = LossNet(temp=config.sigma)
 
@@ -132,7 +139,7 @@ if __name__ == '__main__':
     if config.save_checkpoint:
         ckptconfig = CheckpointConfig(save_checkpoint_steps=config.save_checkpoint_epochs * dataset_batch_num,
                                       keep_checkpoint_max=config.keep_checkpoint_max)
-        ckpoint_cb = ModelCheckpoint(prefix='AVA', directory=save_checkpoint_path, config=ckptconfig)
+        ckpoint_cb = ModelCheckpoint(prefix='SIFLoc', directory=save_checkpoint_path, config=ckptconfig)
         cb += [ckpoint_cb]
 
     model = Model(net)
@@ -143,5 +150,5 @@ if __name__ == '__main__':
     save_config([os.path.join(save_checkpoint_path, config_name)], config, vars(args_opt))
 
     print("training begins...")
-    dataset_sink_mode = True if args_opt.device_target == "Ascend" else False
+    dataset_sink_mode = bool(args_opt.device_target == "Ascend")
     model.train(config.epochs, dataset, callbacks=cb, dataset_sink_mode=dataset_sink_mode)

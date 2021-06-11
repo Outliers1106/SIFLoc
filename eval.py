@@ -1,16 +1,18 @@
+"""SIFLoc eval on hpa dataset"""
 import argparse
 import random
 import numpy as np
+import mindspore.dataset.engine as de
 
-from mindspore import context, Tensor
+from mindspore import context
 from mindspore.train import Model
 from mindspore.train.serialization import load_checkpoint, load_param_into_net
+from mindspore.nn import BCELoss
 
-import mindspore.dataset.engine as de
 from src.datasets import makeup_dataset
 from src.resnet import resnet18, resnet50, resnet101
 from src.network_define_eval import EvalCell, EvalMetric
-from src.loss import BCELoss
+
 
 random.seed(123)
 np.random.seed(123)
@@ -43,7 +45,7 @@ if __name__ == "__main__":
     elif args_opt.model_arch == 'resnet101':
         resnet = resnet101(pretrain=False, classes=args_opt.classes)
     else:
-        raise ("Unsupported net work!")
+        raise "Unsupported net work!"
 
     param_dict = load_checkpoint(ckpt_path)
     load_param_into_net(resnet, param_dict)

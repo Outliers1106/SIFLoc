@@ -1,3 +1,5 @@
+"""learning rate schedule"""
+
 import math
 
 
@@ -46,7 +48,7 @@ def step_cosine_lr(init_lr, total_epochs, epoch_stage, steps_per_epoch, mode='ep
     """
     lr_each_step = []
 
-    assert (sum(epoch_stage) == total_epochs)
+    assert sum(epoch_stage) == total_epochs
 
     if mode == 'epoch':
         cur_epoch = 0

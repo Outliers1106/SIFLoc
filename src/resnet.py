@@ -32,19 +32,16 @@ def _weight_variable_(shape, factor=0.01):
 
 
 def _conv3x3(in_channel, out_channel, stride=1):
-    weight_shape = (out_channel, in_channel, 3, 3)
     return nn.Conv2d(in_channel, out_channel,
                      kernel_size=3, stride=stride, padding=0, pad_mode='same', weight_init="HeUniform")
 
 
 def _conv1x1(in_channel, out_channel, stride=1):
-    weight_shape = (out_channel, in_channel, 1, 1)
     return nn.Conv2d(in_channel, out_channel,
                      kernel_size=1, stride=stride, padding=0, pad_mode='same', weight_init="HeUniform")
 
 
 def _conv7x7(in_channel, out_channel, stride=1):
-    weight_shape = (out_channel, in_channel, 7, 7)
     return nn.Conv2d(in_channel, out_channel,
                      kernel_size=7, stride=stride, padding=0, pad_mode='same', weight_init="HeUniform")
 
@@ -53,22 +50,21 @@ def _bn(channel, training=True):
     if training:
         return nn.BatchNorm2d(channel, eps=1e-4, momentum=0.9,
                               gamma_init=1, beta_init=0, moving_mean_init=0, moving_var_init=1)
-    else:
-        return nn.BatchNorm2d(channel, eps=1e-4, momentum=0.9,
-                              gamma_init=1, beta_init=0, moving_mean_init=0, moving_var_init=1, use_batch_statistics=training)
+    return nn.BatchNorm2d(channel, eps=1e-4, momentum=0.9,
+                          gamma_init=1, beta_init=0, moving_mean_init=0,
+                          moving_var_init=1, use_batch_statistics=training)
 
 
 def _bn_last(channel, training=True):
     if training:
         return nn.BatchNorm2d(channel, eps=1e-4, momentum=0.9,
                               gamma_init=1, beta_init=0, moving_mean_init=0, moving_var_init=1)
-    else:
-        return nn.BatchNorm2d(channel, eps=1e-4, momentum=0.9,
-                              gamma_init=0, beta_init=0, moving_mean_init=0, moving_var_init=1, use_batch_statistics=training)
+    return nn.BatchNorm2d(channel, eps=1e-4, momentum=0.9,
+                          gamma_init=0, beta_init=0, moving_mean_init=0,
+                          moving_var_init=1, use_batch_statistics=training)
 
 
 def _fc(in_channel, out_channel):
-    weight_shape = (out_channel, in_channel)
     return nn.Dense(in_channel, out_channel, has_bias=True, weight_init="HeUniform", bias_init=0)
 
 
@@ -105,6 +101,7 @@ class BasicBlock(nn.Cell):
         self.add = P.TensorAdd()
 
     def construct(self, x):
+        """forward function"""
         identity = x
 
         out = self.conv1(x)
@@ -170,6 +167,7 @@ class ResidualBlock(nn.Cell):
         self.add = P.TensorAdd()
 
     def construct(self, x):
+        """forward function"""
         identity = x
 
         out = self.conv1(x)
@@ -302,6 +300,7 @@ class ResNet(nn.Cell):
         return nn.SequentialCell(layers)
 
     def construct(self, x):
+        """forward function"""
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)
@@ -323,10 +322,9 @@ class ResNet(nn.Cell):
             out = self.l2norm(out)
             out1, out2, out3 = self.split(out)
             return out1, out2, out3
-        else:
-            out = self.end_point_class(out)
-            out = self.sigmoid(out)
-            return out
+        out = self.end_point_class(out)
+        out = self.sigmoid(out)
+        return out
 
 
 def resnet50(low_dims=128, pretrain=True, use_MLP=False, classes=10):

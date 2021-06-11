@@ -1,5 +1,7 @@
+"""callbacks"""
 import time
 from mindspore.train.callback import Callback
+
 
 class LossCallBack(Callback):
     """
@@ -29,6 +31,7 @@ class LossCallBack(Callback):
         self.epoch_time = time.time()
 
     def epoch_end(self, run_context):
+        """record loss and time"""
         epoch_seconds = time.time() - self.epoch_time
         self._per_step_seconds = epoch_seconds / self.data_size
         self._loss = self.loss_sum / self.step_cnt
@@ -38,14 +41,15 @@ class LossCallBack(Callback):
         cb_params = run_context.original_args()
         epoch_idx = (cb_params.cur_step_num - 1) // cb_params.batch_num + 1
         print("the {} epoch's resnet result: "
-                         " training loss {},"
-                         "training per step cost {:.2f} s, total_cost {:.2f} s".format(
-            epoch_idx, self._loss, self._per_step_seconds, self._per_step_seconds * cb_params.batch_num))
+              "training loss {},"
+              "training per step cost {:.2f} s, total_cost {:.2f} s".format(
+                  epoch_idx, self._loss, self._per_step_seconds, self._per_step_seconds * cb_params.batch_num))
 
         self.logger.info("the {} epoch's resnet result: "
-                         " training loss {},"
+                         "training loss {},"
                          "training per step cost {:.2f} s, total_cost {:.2f} s".format(
-            epoch_idx, self._loss, self._per_step_seconds, self._per_step_seconds * cb_params.batch_num))
+                             epoch_idx, self._loss, self._per_step_seconds,
+                             self._per_step_seconds * cb_params.batch_num))
 
     def get_loss(self):
         return self._loss

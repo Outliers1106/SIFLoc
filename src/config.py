@@ -1,19 +1,19 @@
 """
 network config setting, will be used in train.py and eval.py
 """
-from easydict import EasyDict as ed
+
 import time
 import json
 import logging
-import os
-
+from easydict import EasyDict as ed
 
 def get_pretrain_config():
+    """get pretrain config"""
     time_prefix = time.strftime("-%Y%m%d-%H%M%S", time.localtime())
-    prefix = "AVA-hpa-pretrain-resnet18-27-613"
+    prefix = "SIFLoc-hpa-pretrain"
     config = ed({
         # base setting
-        "description": "this is the description for currnet config file.",
+        "description": "this is the description for current config file.",
         "prefix": prefix,
         "time_prefix": time_prefix,
         "network": "resnet18",
@@ -28,7 +28,7 @@ def get_pretrain_config():
         # dataset
         "dataset": "hpa",
         "bag_size": 1,
-        "classes": 27,
+        "classes": 10,
         "num_parallel_workers": 8,
 
         # optimizer
@@ -40,6 +40,7 @@ def get_pretrain_config():
         "sigma": 0.1,
 
         # trainer
+        "breakpoint_training_path": "",
         "batch_size": 32,
         "epochs": 100,
         "lr_schedule": "cosine_lr",
@@ -50,11 +51,12 @@ def get_pretrain_config():
 
 
 def get_train_config():
+    """get train config"""
     time_prefix = time.strftime("-%Y%m%d-%H%M%S", time.localtime())
-    prefix = "AVA-hpa-train-resnet18-27-613"
+    prefix = "SIFLoc-hpa-train"
     config = ed({
         # base setting
-        "description": "this is the description for currnet config file.",
+        "description": "this is the description for current config file.",
         "prefix": prefix,
         "time_prefix": time_prefix,
         "network": "resnet18",
@@ -70,7 +72,7 @@ def get_train_config():
         "dataset": "hpa",
         "bag_size_for_train": 1,
         "bag_size_for_eval": 20,
-        "classes": 27,
+        "classes": 10,
         "num_parallel_workers": 8,
 
         # optimizer
@@ -82,6 +84,7 @@ def get_train_config():
         "loss_scale": 1,
 
         # trainer
+        "breakpoint_training_path": "",
         "batch_size_for_train": 8,
         "batch_size_for_eval": 1,
         "epochs": 20,

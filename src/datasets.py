@@ -1,25 +1,27 @@
+"""hpa dataset"""
+
 import os
-from PIL import Image
-from src.RandAugment import RandAugment
-import numpy as np
-from mindspore.dataset import GeneratorDataset
-import pandas as pd
 from collections import Counter
-from mindspore.dataset.transforms.py_transforms import Compose
+from PIL import Image
+import numpy as np
+import pandas as pd
 import mindspore.dataset.vision.py_transforms as transforms
+from mindspore.dataset import GeneratorDataset
+from mindspore.dataset.transforms.py_transforms import Compose
+from src.RandAugment import RandAugment
 
-
-# split train val test = 2:1:7
+# split train val test = 4:1:5
 def split_train_val_test(sids):
     np.random.seed(286501567)
     np.random.shuffle(sids)
-    ts = int(len(sids) * 0.2)
-    vs = int(len(sids) * 0.3)
+    ts = int(len(sids) * 0.4)
+    vs = int(len(sids) * 0.5)
 
     return sids[:ts], sids[ts:vs], sids[vs:]
 
 
 class TransformOnImg:
+    """transform on image"""
     def __init__(self, mode):
         self.mode = mode
         rand_augment = RandAugment(n=2, m=10)
@@ -27,8 +29,7 @@ class TransformOnImg:
             transforms.ToPIL(),
             transforms.Resize(256),
             transforms.RandomResizedCrop(size=224, scale=(0.2, 1.)),
-            transforms.RandomColorAdjust(0.4, 0.4, 0.4, 0.4),
-            transforms.RandomGrayscale(prob=0.2),
+            transforms.RandomColorAdjust(0.4, 0.4, 0.4, 0),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
             transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
@@ -71,6 +72,7 @@ class TransformOnImg:
 
 
 class BagDataCollatePretrain():
+    """collect bag data on pretrain stage"""
     def __init__(self):
         pass
 
@@ -80,12 +82,13 @@ class BagDataCollatePretrain():
 
 
 class BagDataCollate():
-
+    """collect bag data on training stage"""
     def __init__(self, mode, max_bag_size=1):
         self.mode = mode
         self.max_bag_size = max_bag_size
 
     def aggregate(self, img, label, nslice):
+        """aggregate data"""
         nb, _, c, h, w = img.shape
         _, nclasses = label.shape
 
@@ -102,13 +105,12 @@ class BagDataCollate():
         if self.mode == "train":
             return allimgs.astype(np.float32), alllabels.astype(np.float32), nslice.astype(np.int32)
 
-        else:  # need `nslice` to recover bag when eval
-            return allimgs.astype(np.float32), label.astype(np.float32), nslice.astype(np.int32)
+        # need `nslice` to recover bag when eval
+        return allimgs.astype(np.float32), label.astype(np.float32), nslice.astype(np.int32)
 
     def __call__(self, batch):
         # bag of one batch
         bsid, bimgs, blabel = batch
-
         size = len(bsid)
 
         # calculate num of patch per bag
@@ -134,8 +136,8 @@ class BagDataCollate():
         pad_imgs = np.array(pad_imgs)[order]
         blabel = np.array(blabel)[order]
         nslice = nslice[order]
-
         return self.aggregate(np.array(pad_imgs), np.array(blabel), np.array(nslice))
+
 
 # balance operation
 def find_i_j_v(seq):
@@ -195,6 +197,7 @@ def balance_split(seq):
 
 
 class HPADataset:
+    """hpa dataset"""
     def __init__(self, data_dir, mode, batch_size, bag_size, classes=10, shuffle=False):
         self.collate = BagDataCollate(mode=mode, max_bag_size=bag_size)
         self.collate_pretrain = BagDataCollatePretrain()
@@ -244,7 +247,7 @@ class HPADataset:
             # split when more than max_bag_size images
             gene_imgs = list(set(gene_imgs))
             bag_size = len(gene_imgs)
-            while (bag_size > max_bag_size):
+            while bag_size > max_bag_size:
                 bag_size = bag_size // 2
 
             # save data of full-size bag
@@ -258,7 +261,7 @@ class HPADataset:
                 final_d[gene_name]['label'] = d[sid]
 
             # save data of none full-size bag
-            if (len(gene_imgs) > num_bags * bag_size):
+            if len(gene_imgs) > num_bags * bag_size:
                 bag_img = gene_imgs[num_bags * bag_size:]
                 gene_name = '%s_%d' % (sid, num_bags)
 
@@ -276,6 +279,7 @@ class HPADataset:
         return anns
 
     def filter_top_cv(self, k=10, csv_file="enhanced.csv"):
+        """get top k frequent labels"""
         # get label
         all_cv = []
         label_file = pd.read_csv(csv_file)
@@ -291,7 +295,8 @@ class HPADataset:
         d = {}
         genes = label_file['Gene']
         labels = label_file['label']
-        for i in range(len(genes)):
+        length = len(genes)
+        for i in range(length):
             d[genes[i]] = list(labels[i].split(";"))
 
         filter_d = {}
@@ -337,34 +342,38 @@ class HPADataset:
             imgs_basic2 = np.stack(imgs_basic2).astype(np.float32)
             imgs_aux = np.stack(imgs_aux).astype(np.float32)
             anns = np.stack(anns).astype(np.int32)
+            n_b, _, n_c, n_w, n_l = imgs_basic1.shape
+            imgs_basic1 = imgs_basic1.reshape((n_b, n_c, n_w, n_l))
+            imgs_basic2 = imgs_basic2.reshape((n_b, n_c, n_w, n_l))
+            imgs_aux = imgs_aux.reshape((n_b, n_c, n_w, n_l))
             batch = (imgs_basic1, imgs_basic2, imgs_aux, anns)
             return self.collate_pretrain(batch)
 
-        else:
-            imgs_tuple = []
-            anns_tuple = []
-            sids_tuple = []
+        imgs_tuple = []
+        anns_tuple = []
+        sids_tuple = []
 
-            for idx in range(index * self.batch_size, (index + 1) * self.batch_size):
-                imgs = []
+        for idx in range(index * self.batch_size, (index + 1) * self.batch_size):
+            imgs = []
 
-                sid = self.sids[idx]
-                sid_imgs = self.db[sid]['img']
-                ann = self.get_sid_label(sid)
+            sid = self.sids[idx]
+            sid_imgs = self.db[sid]['img']
+            ann = self.get_sid_label(sid)
 
-                for imgpth in sid_imgs:
-                    img = Image.open(imgpth).convert('RGB')
-                    img = np.asarray(img)
-                    img = self.transform(img)
-                    imgs.append(img)
+            for imgpth in sid_imgs:
+                img = Image.open(imgpth).convert('RGB')
+                img = np.asarray(img)
+                img = self.transform(img)
+                # transform return a tuple of length 1, tuple[0] has the image of shape 3,224,224
+                imgs.append(img[0])
 
-                imgs = np.stack(imgs)
-                imgs_tuple.append(imgs)
-                anns_tuple.append(ann)
-                sids_tuple.append(sid)
+            imgs = np.stack(imgs)
+            imgs_tuple.append(imgs)
+            anns_tuple.append(ann)
+            sids_tuple.append(sid)
 
-            batch = (tuple(sids_tuple), tuple(imgs_tuple), tuple(anns_tuple))
-            return self.collate(batch)
+        batch = (tuple(sids_tuple), tuple(imgs_tuple), tuple(anns_tuple))
+        return self.collate(batch)
 
 
 def makeup_pretrain_dataset(data_dir, batch_size, bag_size, epoch=1, shuffle=False, classes=10, num_parallel_workers=4):

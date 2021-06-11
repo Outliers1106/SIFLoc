@@ -1,11 +1,12 @@
-# code in this file is adpated from rpmcruz/autoaugment
-# https://github.com/rpmcruz/autoaugment/blob/master/transformations.py
+"""
+code in this file is adpated from rpmcruz/autoaugment
+https://github.com/rpmcruz/autoaugment/blob/master/transformations.py
+"""
+
 import random
-from PIL import Image, ImageFilter
-import PIL, PIL.ImageOps, PIL.ImageEnhance, PIL.ImageDraw
 import numpy as np
-# import torch
-from PIL import Image
+import PIL
+from PIL import Image, ImageDraw, ImageOps, ImageEnhance
 
 
 def ShearX(img, v):  # [-0.3, 0.3]
@@ -31,7 +32,7 @@ def TranslateX(img, v):  # [-150, 150] => percentage: [-0.45, 0.45]
 
 
 def TranslateXabs(img, v):  # [-150, 150] => percentage: [-0.45, 0.45]
-    assert 0 <= v
+    assert v >= 0
     if random.random() > 0.5:
         v = -v
     return img.transform(img.size, PIL.Image.AFFINE, (1, 0, v, 0, 1, 0))
@@ -46,7 +47,7 @@ def TranslateY(img, v):  # [-150, 150] => percentage: [-0.45, 0.45]
 
 
 def TranslateYabs(img, v):  # [-150, 150] => percentage: [-0.45, 0.45]
-    assert 0 <= v
+    assert v >= 0
     if random.random() > 0.5:
         v = -v
     return img.transform(img.size, PIL.Image.AFFINE, (1, 0, 0, 0, 1, v))
@@ -60,24 +61,24 @@ def Rotate(img, v):  # [-30, 30]
 
 
 def AutoContrast(img, _):
-    return PIL.ImageOps.autocontrast(img)
+    return ImageOps.autocontrast(img)
 
 
 def Invert(img, _):
-    return PIL.ImageOps.invert(img)
+    return ImageOps.invert(img)
 
 
 def Equalize(img, _):
-    return PIL.ImageOps.equalize(img)
+    return ImageOps.equalize(img)
 
 
 def Flip(img, _):  # not from the paper
-    return PIL.ImageOps.mirror(img)
+    return ImageOps.mirror(img)
 
 
 def Solarize(img, v):  # [0, 256]
     assert 0 <= v <= 256
-    return PIL.ImageOps.solarize(img, v)
+    return ImageOps.solarize(img, v)
 
 
 def SolarizeAdd(img, addition=0, threshold=128):
@@ -86,32 +87,32 @@ def SolarizeAdd(img, addition=0, threshold=128):
     img_np = np.clip(img_np, 0, 255)
     img_np = img_np.astype(np.uint8)
     img = Image.fromarray(img_np)
-    return PIL.ImageOps.solarize(img, threshold)
+    return ImageOps.solarize(img, threshold)
 
 
 def Posterize(img, v):  # [4, 8]
     v = int(v)
-    return PIL.ImageOps.posterize(img, v)
+    return ImageOps.posterize(img, v)
 
 
 def Contrast(img, v):  # [0.1,1.9]
     assert 0.1 <= v <= 1.9
-    return PIL.ImageEnhance.Contrast(img).enhance(v)
+    return ImageEnhance.Contrast(img).enhance(v)
 
 
 def Color(img, v):  # [0.1,1.9]
     assert 0.1 <= v <= 1.9
-    return PIL.ImageEnhance.Color(img).enhance(v)
+    return ImageEnhance.Color(img).enhance(v)
 
 
 def Brightness(img, v):  # [0.1,1.9]
     assert 0.1 <= v <= 1.9
-    return PIL.ImageEnhance.Brightness(img).enhance(v)
+    return ImageEnhance.Brightness(img).enhance(v)
 
 
 def Sharpness(img, v):  # [0.1,1.9]
     assert 0.1 <= v <= 1.9
-    return PIL.ImageEnhance.Sharpness(img).enhance(v)
+    return ImageEnhance.Sharpness(img).enhance(v)
 
 
 def Cutout(img, v):  # [0, 60] => percentage: [0, 0.2]
@@ -122,24 +123,10 @@ def Cutout(img, v):  # [0, 60] => percentage: [0, 0.2]
     v = v * img.size[0]
     return CutoutAbs(img, v)
 
-def ToEMBOSS(img,v):
-    # 浮雕效果
-    return img.filter(ImageFilter.EMBOSS)
 
-def ToEDGES(img,v):
-    # 边缘
-    return img.filter(ImageFilter.FIND_EDGES)
-
-def ToCONTOUR(img,v):
-    # 轮廓
-    return img.filter(ImageFilter.CONTOUR)
-
-def ToBLUR(img,v):
-    return img.filter(ImageFilter.BLUR)
-
-
-def CutoutAbs(img, v):  # [0, 60] => percentage: [0, 0.2]
-    # assert 0 <= v <= 20
+def CutoutAbs(img, v):
+    """cutoutabs"""
+    # [0, 60] => percentage: [0, 0.2]
     if v < 0:
         return img
     w, h = img.size
@@ -155,7 +142,7 @@ def CutoutAbs(img, v):  # [0, 60] => percentage: [0, 0.2]
     color = (125, 123, 114)
     # color = (0, 0, 0)
     img = img.copy()
-    PIL.ImageDraw.Draw(img).rectangle(xy, color)
+    ImageDraw.Draw(img).rectangle(xy, color)
     return img
 
 
@@ -172,28 +159,9 @@ def Identity(img, v):
     return img
 
 
-def augment_list():  # 16 oeprations and their ranges
-    # https://github.com/google-research/uda/blob/master/image/randaugment/policies.py#L57
-    # l = [
-    #     (Identity, 0., 1.0),
-    #     (ShearX, 0., 0.3),  # 0
-    #     (ShearY, 0., 0.3),  # 1
-    #     (TranslateX, 0., 0.33),  # 2
-    #     (TranslateY, 0., 0.33),  # 3
-    #     (Rotate, 0, 30),  # 4
-    #     (AutoContrast, 0, 1),  # 5
-    #     (Invert, 0, 1),  # 6
-    #     (Equalize, 0, 1),  # 7
-    #     (Solarize, 0, 110),  # 8
-    #     (Posterize, 4, 8),  # 9
-    #     # (Contrast, 0.1, 1.9),  # 10
-    #     (Color, 0.1, 1.9),  # 11
-    #     (Brightness, 0.1, 1.9),  # 12
-    #     (Sharpness, 0.1, 1.9),  # 13
-    #     # (Cutout, 0, 0.2),  # 14
-    #     # (SamplePairing(imgs), 0, 0.4),  # 15
-    # ]
-
+def augment_list():
+    """augment list"""
+    # oeprations and their ranges
     # https://github.com/tensorflow/tpu/blob/8462d083dd89489a79e3200bcc8d4063bf362186/models/official/efficientnet/autoaugment.py#L505
     l = [
         (AutoContrast, 0, 1),
@@ -203,35 +171,31 @@ def augment_list():  # 16 oeprations and their ranges
         (Posterize, 0, 4),
         (Solarize, 0, 256),
         (SolarizeAdd, 0, 110),
-        #(Color, 0.1, 1.9),
+        # (Color, 0.1, 1.9),
         (Contrast, 0.1, 1.9),
-        #(Brightness, 0.1, 1.9),
+        # (Brightness, 0.1, 1.9),
         (Sharpness, 0.1, 1.9),
         (ShearX, 0., 0.3),
         (ShearY, 0., 0.3),
         (CutoutAbs, 0, 40),
         (TranslateXabs, 0., 100),
         (TranslateYabs, 0., 100),
-        (ToBLUR,0,1),
-        (ToCONTOUR,0,1),
-        (ToEMBOSS,0,1),
-        (ToEDGES,0,1)
     ]
 
     return l
 
 
 class RandAugment:
+    """RandAugment"""
     def __init__(self, n, m):
         self.n = n
-        self.m = m      # [0, 30]
+        self.m = m  # [0, 30]
         self.augment_list = augment_list()
 
     def __call__(self, img):
-        ops=[]
-        for i in range(self.n):
+        ops = []
+        for _ in range(self.n):
             ops.append(random.choice(self.augment_list))
-        #ops = random.choices(self.augment_list, k=self.n)
         for op, minval, maxval in ops:
             val = (float(self.m) / 30) * float(maxval - minval) + minval
             img = op(img, val)
